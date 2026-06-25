@@ -1,1 +1,9 @@
-[]
+{
+  "attendance": "Yes, I'll be there!",
+  "name": "Test User",
+  "phone": "",
+  "timestamp": "2026-06-24T22:28:57.9142551-05:00",
+  "guests": "2",
+  "message": "Test RSVP",
+  "email": "test@example.com"
+}
