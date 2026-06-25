@@ -7,5 +7,14 @@
     "attendance": "Yes, I'll be there!",
     "message": "Test RSVP",
     "timestamp": "2026-06-24T22:28:57.9142551-05:00"
+  },
+  {
+    "phone": "",
+    "message": "Added for testing",
+    "attendance": "Yes, I'll be there!",
+    "timestamp": "2026-06-24T22:48:09.7782005-05:00",
+    "email": "anonymous@example.com",
+    "guests": "1",
+    "name": "Extra Guest"
   }
 ]
