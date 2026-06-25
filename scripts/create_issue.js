@@ -22,7 +22,20 @@ function parseISO(s) {
     const filePath = path.join(process.cwd(), 'submissions.json');
     let submissions = [];
     if (fs.existsSync(filePath)) {
-      submissions = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      try {
+        const raw = fs.readFileSync(filePath, 'utf8').trim();
+        if (raw.length === 0) {
+          submissions = [];
+        } else {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) submissions = parsed;
+          else if (parsed && typeof parsed === 'object') submissions = Object.values(parsed);
+          else submissions = [];
+        }
+      } catch (e) {
+        console.warn('Failed to parse submissions.json, using empty list', e.message);
+        submissions = [];
+      }
     }
 
     // Cumulative totals
