@@ -29,8 +29,14 @@ function parseISO(s) {
         } else {
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed)) submissions = parsed;
-          else if (parsed && typeof parsed === 'object') submissions = Object.values(parsed);
-          else submissions = [];
+          else if (parsed && typeof parsed === 'object') {
+            // If parsed looks like a single submission object (has attendance/name/email), wrap it
+            const keys = Object.keys(parsed || {});
+            const likelySubmissionKeys = ['name','email','attendance','timestamp'];
+            const hasSubmissionKey = keys.some(k => likelySubmissionKeys.includes(k));
+            if (hasSubmissionKey) submissions = [parsed];
+            else submissions = Object.values(parsed);
+          } else submissions = [];
         }
       } catch (e) {
         console.warn('Failed to parse submissions.json, using empty list', e.message);
