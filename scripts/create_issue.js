@@ -36,6 +36,12 @@ function parseISO(s) {
         console.warn('Failed to parse submissions.json, using empty list', e.message);
         submissions = [];
       }
+
+      // Ensure submissions is an array before using array methods
+      if (!Array.isArray(submissions)) {
+        console.warn('submissions is not an array after parsing; coercing to empty array');
+        submissions = [];
+      }
     }
 
     // Cumulative totals
