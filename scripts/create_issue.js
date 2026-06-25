@@ -5,6 +5,10 @@
 const fs = require('fs');
 const path = require('path');
 
+function parseISO(s) {
+  try { return new Date(s); } catch { return null; }
+}
+
 (async () => {
   try {
     const repo = process.env.GITHUB_REPOSITORY; // owner/repo
@@ -21,13 +25,31 @@ const path = require('path');
       submissions = JSON.parse(fs.readFileSync(filePath, 'utf8'));
     }
 
-    const total = submissions.length;
-    const yes = submissions.filter(s => /yes/i.test(s.attendance)).length;
-    const no = submissions.filter(s => /no/i.test(s.attendance)).length;
+    // Cumulative totals
+    const totalAll = submissions.length;
+    const yesAll = submissions.filter(s => /yes/i.test(String(s.attendance))).length;
+    const noAll = submissions.filter(s => /no/i.test(String(s.attendance))).length;
 
-    const date = new Date().toLocaleString('en-US', { timeZone: 'UTC', hour12: false });
+    // Compute today's (UTC) window
+    const now = new Date();
+    const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const startOfTomorrow = new Date(startOfToday);
+    startOfTomorrow.setUTCDate(startOfTomorrow.getUTCDate() + 1);
 
-    const body = `Daily RSVP summary (UTC) - ${date}\n\nTotal responses: ${total}\nYes: ${yes}\nNo: ${no}\n\nView full responses: https://github.com/${owner}/${repoName}/blob/main/submissions.json`;
+    const todays = submissions.filter(s => {
+      if (!s.timestamp) return false;
+      const t = parseISO(s.timestamp);
+      if (!t || isNaN(t.getTime())) return false;
+      return t >= startOfToday && t < startOfTomorrow;
+    });
+
+    const totalToday = todays.length;
+    const yesToday = todays.filter(s => /yes/i.test(String(s.attendance))).length;
+    const noToday = todays.filter(s => /no/i.test(String(s.attendance))).length;
+
+    const dateUTC = startOfToday.toISOString().slice(0,10);
+
+    const body = `RSVP Daily Summary for ${dateUTC} (UTC)\n\nToday (new): ${totalToday} responses\n  Yes: ${yesToday}\n  No: ${noToday}\n\nCumulative total: ${totalAll} responses\n  Yes: ${yesAll}\n  No: ${noAll}\n\nView full responses: https://github.com/${owner}/${repoName}/blob/main/submissions.json`;
 
     const headers = {
       Authorization: `token ${token}`,
