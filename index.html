@@ -416,9 +416,43 @@
     </div>
 
     <script>
-        // Show success message when redirected back from formsubmit
+        const form = document.getElementById('rsvpForm');
         const successMessage = document.getElementById('successMessage');
         const errorMessage = document.getElementById('errorMessage');
+
+        // Replace this with your deployed serverless URL (Vercel/Netlify)
+        const SERVERLESS_ENDPOINT = 'https://<YOUR_SERVERLESS_DEPLOYMENT>/api/submit';
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+
+            const formData = new FormData(form);
+
+            // First: send to serverless to store in repo
+            try {
+                // Convert FormData to plain object
+                const payload = {};
+                for (const [k,v] of formData.entries()) payload[k] = v;
+
+                await fetch(SERVERLESS_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+            } catch (err) {
+                console.warn('Serverless logging failed:', err);
+                // We continue — form will still be submitted to Formsubmit for email
+            }
+
+            // Then submit to Formsubmit (keeps email forwarding behavior)
+            // Use the form's action to post (it points to Formsubmit.co)
+            form.submit();
+        });
+
+        // Show success message when redirected back from formsubmit
         if (window.location.search.indexOf('submitted=1') !== -1) {
             successMessage.style.display = 'block';
             successMessage.scrollIntoView({ behavior: 'smooth' });
